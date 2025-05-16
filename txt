@@ -1,0 +1,521 @@
+-- Fuck Krnl Android Alway Delete My Saved Script When I Doin My Script
+
+local folderPath = "Asset_R_Download"
+if not isfolder(folderPath) then makefolder(folderPath) end
+
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local Frame = Instance.new("Frame", ScreenGui)
+local Bar = Instance.new("Frame", Frame)
+local TextLabel = Instance.new("TextLabel", Frame)
+
+ScreenGui.Name = "ProgressBarGui"
+
+Frame.Size = UDim2.new(0, 400, 0, 50)
+Frame.Position = UDim2.new(0.5, -200, 0.85, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Frame.BorderSizePixel = 0
+
+Bar.Size = UDim2.new(0, 0, 1, 0)
+Bar.Position = UDim2.new(0, 0, 0, 0)
+Bar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+Bar.BorderSizePixel = 0
+
+local ErrorLabel = Instance.new("TextLabel", Frame)
+ErrorLabel.Size = UDim2.new(1, 0, 0, 20)
+ErrorLabel.Position = UDim2.new(0, 0, 1, 0)
+ErrorLabel.BackgroundTransparency = 1
+ErrorLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+ErrorLabel.Font = Enum.Font.SourceSans
+ErrorLabel.TextScaled = true
+ErrorLabel.Text = ""
+
+TextLabel.Size = UDim2.new(1, 0, 1, 0)
+TextLabel.Position = UDim2.new(0, 0, 0, 0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.TextScaled = true
+TextLabel.Text = "Downloading Asset... | 0%"
+
+local files = {
+{name = "SEARCH_FRIEND.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "MENU_TOPBAR_ICON.png", url = "https://i.postimg.cc/ZKdCrbH3/img-set-3x-15.png"},
+{name = "MENU_TOPBAR_CLOSE_ICON.png", url = "https://i.postimg.cc/J0kMPPB1/img-set-1x-6.png"},
+{name = "ROBLOX_ICON.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "CURSOR.png", url = "https://google.com"},
+{name = "SETTING.png", url = "https://i.postimg.cc/ZKdCrbH3/img-set-3x-15.png"},
+{name = "PLAYERS.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "HELP.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "REPORT.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "CAPTURE.png", url = "https://i.postimg.cc/tJZ7Rr66/img-set-1x-8.png"},
+{name = "CLOSE_STYLE_1.png", url = "https://i.postimg.cc/br8ZszRj/cancel-Button.png"},
+{name = "EMOTE_LINE.png", url = "https://i.postimg.cc/4yPmTX18/Touch-Controls-Sheet-V2.png"},
+{name = "EMOTE_SELECTED.png", url = "https://i.postimg.cc/4yPmTX18/Touch-Controls-Sheet-V2.png"},
+{name = "EMOTE_WEEL.png", url = "https://i.postimg.cc/4yPmTX18/Touch-Controls-Sheet-V2.png"},
+{name = "BLOCK_PLAYER.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "INSPECT.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "DROPDOWN_ICON.png", url = "https://i.postimg.cc/GpJz4pFc/Drop-Down-2x.png"},
+{name = "LESS_CONTROL.png", url = "https://i.postimg.cc/J4xkHBgY/Less.png"},
+{name = "MORE_CONTROL.png", url = "https://i.postimg.cc/sg2ZYgCj/More.png"},
+{name = "LEFT_CONTROL.png", url = "https://i.postimg.cc/HkSXR798/Left-2x.png"},
+{name = "RIGHT_CONTROL.png", url = "https://i.postimg.cc/CLS8K4vf/Right-2x.png"},
+{name = "CHAT_ON.png", url = "https://i.postimg.cc/bvWywBD8/img-set-2x-23.png"},
+{name = "CHAT_OFF.png", url = "https://i.postimg.cc/bvWywBD8/img-set-2x-23.png"},
+{name = "CAM.png", url = "https://i.postimg.cc/XvckbgSx/img-set-2x-20.png"},
+{name = "SHARE_FRIEND.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "CHAT_SEND.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "TOUCHGUI.png", url = "https://i.postimg.cc/4yPmTX18/Touch-Controls-Sheet-V2.png"},
+{name = "REPORT_ACTION_LEFT.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "REPORT_ACTION_RIGHT.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "REPORT_ACTION_SELECTOR.png", url = "https://i.postimg.cc/cLfY3rng/img-set-1x-7.png"},
+{name = "CHAT_REPORT.png", url = "https://i.postimg.cc/tJZ7Rr66/img-set-1x-8.png"},
+}
+
+local assets = {}
+local total = #files
+local downloaded = 0
+
+for _, file in ipairs(files) do
+    task.spawn(function()
+        local path = folderPath .. "/" .. file.name
+        local varName = file.name:match("^(.-)%.") or file.name
+        local success, result = pcall(function()
+            if not isfile(path) then
+                local content = game:HttpGet(file.url)
+                if not content or #content < 100 then error("Invalid or empty content.") end
+                writefile(path, content)
+            end
+        end)
+
+        if not success then
+            warn("[Download Error] " .. file.name .. ": " .. tostring(result))
+            ErrorLabel.Text = "Error: " .. file.name .. " (" .. tostring(result) .. ")"
+        else
+            ErrorLabel.Text = ""
+            if isfile(path) then
+                assets[varName] = getcustomasset(path)
+            end
+        end
+
+        downloaded += 1
+        local percent = math.floor((downloaded / total) * 100)
+        Bar.Size = UDim2.new(percent / 100, 0, 1, 0)
+        TextLabel.Text = "Downloading Asset... | " .. percent .. "%"
+    end)
+end
+
+repeat task.wait(0.1) until downloaded >= total
+TextLabel.Text = "Download Completed!"
+task.wait(0.25)
+ScreenGui:Destroy()
+
+local SEARCH_FRIEND = assets["SEARCH_FRIEND"]
+local MENU_TOPBAR_ICON = assets["MENU_TOPBAR_ICON"]
+local MENU_TOPBAR_CLOSE_ICON = assets["MENU_TOPBAR_CLOSE_ICON"]
+local ROBLOX_ICON = assets["ROBLOX_ICON"]
+local CURSOR = assets["CURSOR"]
+local SETTING = assets["SETTING"]
+local PLAYERS = assets["PLAYERS"]
+local HELP = assets["HELP"]
+local REPORT = assets["REPORT"]
+local CAPTURE = assets["CAPTURE"]
+local CLOSE_STYLE_1 = assets["CLOSE_STYLE_1"]
+local EMOTE_LINE = assets["EMOTE_LINE"]
+local EMOTE_SELECTED = assets["EMOTE_SELECTED"]
+local EMOTE_WEEL = assets["EMOTE_WEEL"]
+local BLOCK_PLAYER = assets["BLOCK_PLAYER"]
+local INSPECT = assets["INSPECT"]
+local REPORT_PLAYER = assets["REPORT_PLAYER"]
+local DROPDOWN_ICON = assets["DROPDOWN_ICON"]
+local LESS_CONTROL = assets["LESS_CONTROL"]
+local MORE_CONTROL = assets["MORE_CONTROL"]
+local LEFT_CONTROL = assets["LEFT_CONTROL"]
+local RIGHT_CONTROL = assets["RIGHT_CONTROL"]
+local CHAT_ON = assets["CHAT_ON"]
+local CHAT_OFF = assets["CHAT_OFF"]
+local CAM = assets["CAM"]
+local SHARE_FRIEND = assets["SHARE_FRIEND"]
+local CHAT_SEND = assets["CHAT_SEND"]
+local TOUCHGUI = assets["TOUCHGUI"]
+local REPORT_ACTION_LEFT = assets["REPORT_ACTION_LEFT"]
+local REPORT_ACTION_RIGHT = assets["REPORT_ACTION_RIGHT"]
+local REPORT_ACTION_SELECTOR = assets["REPORT_ACTION_SELECTOR"]
+local CHAT_REPORT = assets["CHAT_REPORT"]
+
+local mcl = Color3.fromRGB(204, 102, 0)
+
+-- close source in 10/4
+
+game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Version", Text = "B Temple\nv0.1.2", Icon = "rbxassetid://90669214159992", Duration = 10})
+
+local function r(imageObject, a, b, c, d)
+    imageObject.ImageRectOffset = Vector2.new(a, b)
+    imageObject.ImageRectSize = Vector2.new(c, d)
+end
+
+local C = game:GetService("CoreGui")
+local P = game:GetService("Players")
+local PG = P.LocalPlayer.PlayerGui
+local T = C.TopBarApp.TopBarApp
+local R = C.RobloxGui
+local ST = R.SettingsClippingShield.SettingsShield
+local S = ST.MenuContainer.HubBar.HubBarContainer
+local PV = R.SettingsClippingShield.SettingsShield.MenuContainer.PageViewClipper.PageView.PageViewInnerFrame
+
+local chat = T.UnibarLeftFrame.UnibarMenu["2"]["3"]:FindFirstChild("chat")
+local menuMenu = T.UnibarLeftFrame.UnibarMenu["2"]["3"].nine_dot.IntegrationIconFrame.IntegrationIcon.Overflow
+local menuClose = T.UnibarLeftFrame.UnibarMenu["2"]["3"].nine_dot.IntegrationIconFrame.IntegrationIcon.Close
+local rbx = T.MenuIconHolder.TriggerPoint:GetChildren()[2].ScalingIcon
+
+local set = S.GameSettingsTab.TabLabel.Icon
+local players = S.PlayersTab.TabLabel.Icon
+local help = S.HelpTab.TabLabel.Icon
+local report = S.ReportAbuseTab.TabLabel.Icon
+local capture = S.CapturesTab.TabLabel.Icon
+
+local playerList = C:FindFirstChild("PlayerList")
+local checkVNG = T.MenuIconHolder.TriggerPoint:FindFirstChild("BadgeOver12")
+local checkEmote = R:FindFirstChild("EmotesMenu")
+
+menuMenu.Image = MENU_TOPBAR_ICON
+menuClose.Image = MENU_TOPBAR_CLOSE_ICON
+rbx.Image = ROBLOX_ICON
+set.Image = SETTING
+players.Image = PLAYERS
+help.Image = HELP
+report.Image = REPORT
+capture.Image = CAPTURE
+
+game:GetService("RunService").Heartbeat:Connect(function()
+r(menuMenu, 707, 85, 88, 88) r(rbx, 378, 380, 39, 39) r(help, 227, 190, 39, 39) r(report, 230, 113, 39, 39) r(players, 417, 190, 39, 39) r(set, 172, 623, 88, 88) r(capture, 114, 341, 39, 39) r(menuClose, 323, 425, 39, 39)
+end)
+
+if playerList then
+print("[Debug] playerList?")
+    local offset = playerList:FindFirstChild("Children") and playerList.Children:FindFirstChild("OffsetFrame")
+    local body = playerList:FindFirstChild("Children") and playerList.Children:FindFirstChild("BodyBackground")
+    
+    local dismissButton
+    if offset then
+        dismissButton = offset:FindFirstChild("PlayerScrollList") and
+                        offset.PlayerScrollList:FindFirstChild("SizeOffsetFrame") and
+                        offset.PlayerScrollList.SizeOffsetFrame:FindFirstChild("TopRoundedRect") and
+                        offset.PlayerScrollList.SizeOffsetFrame.TopRoundedRect:FindFirstChild("DismissIconFrame") and
+                        offset.PlayerScrollList.SizeOffsetFrame.TopRoundedRect.DismissIconFrame:FindFirstChild("DismissButton")
+    end
+
+    local closeButton
+    if body then
+        closeButton = body:FindFirstChild("CloseButton")
+    end
+
+    local targetButton = dismissButton or closeButton
+
+    if targetButton and targetButton:FindFirstChild("imageLabel") then
+        targetButton.imageLabel.Image = CLOSE_STYLE_1
+        r(targetButton.imageLabel, 0, 0, 0, 0)
+    end
+end
+
+if checkVNG then
+print("[Debug] checkVNG: Ok")
+T.MenuIconHolder.TriggerPoint:GetChildren()[3]:Destroy()
+game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Roblox VNG", Text = "Phiên bản này sẽ có lỗi xảy ra.", Icon = CLOSE_STYLE_1, Duration = 10})
+else
+warn("[Debug] checkVNG: Fail")
+end
+
+if checkEmote then
+print("[Debug] checkEmote: Ok")
+local emoteWeel = R.EmotesMenu.Children.Main.EmotesWheel.Back.Background.BackgroundImage
+local emoteLine = R.EmotesMenu.Children.Main.EmotesWheel.Back.Background.Selection.SelectionEffect.SelectedLine
+local emoteSelect = R.EmotesMenu.Children.Main.EmotesWheel.Back.Background.BackgroundGradient.SelectionGradient.SelectedGradient
+r(emoteWeel)
+emoteLine.Image = EMOTE_LINE
+emoteSelect.Image = EMOTE_SELECTED
+emoteWeel.Image = EMOTE_WEEL
+else
+warn("[Debug] checkEmote: Fail")
+end
+
+if chat then
+local _chat = T.UnibarLeftFrame.UnibarMenu["2"]["3"].chat.IntegrationIconFrame.IntegrationIcon
+_chat.Image = CHAT_OFF
+r(_chat, 370, 0, 73, 73)
+
+local iconChatHit = T.UnibarLeftFrame.UnibarMenu["2"]["3"].chat.IconHitArea_chat
+
+local desiredPosOn = UDim2.fromOffset(370, 0)
+local desiredPosOff = UDim2.fromOffset(370, 73)
+
+iconChatHit.MouseButton1Click:Connect(function()
+    local chatBar = C:FindFirstChild("ExperienceChat")
+
+    if chatBar and chatBar.appLayout.chatInputBar.Visible then  
+        _chat.Image = CHAT_OFF
+        r(_chat, desiredPosOn.X.Offset, desiredPosOn.Y.Offset, 73, 73)
+    else
+        _chat.Image = CHAT_ON
+        r(_chat, desiredPosOff.X.Offset, desiredPosOff.Y.Offset, 73, 73)
+    end
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    if _chat.Position.X.Offset ~= 370 then
+        if _chat.Image == CHAT_OFF then
+            r(_chat, 370, 0, 73, 73)
+        elseif _chat.Image == CHAT_ON then
+            r(_chat, 370, 73, 73, 73)
+        end
+    end
+end)
+
+task.spawn(function()
+	game:GetService("RunService").Heartbeat:Connect(function()
+
+		local checkLeave = PV:FindFirstChild("LeaveGamePage")
+		local checkReset = PV:FindFirstChild("ResetCharacter")
+		local checkLeaveButton = ST.MenuContainer.BottomButtonFrame:FindFirstChild("LeaveGameButtonButton")
+		local checkInspect = R:FindFirstChild("Container")
+		local checkSetting = PV:FindFirstChild("Page")
+		local checkgChat = C:FindFirstChild("ExperienceChat")
+		local checkInventory = R:FindFirstChild("Backpack")
+local checkcam = R:FindFirstChild("EntrypointButtonFrame")
+local checkReport = PV:FindFirstChild("ReportAbuseMenuNewContainerPage")
+
+if checkReport then
+    local icon = checkReport.AbuseReportMenuNewRoot.FocusNavigationCoreScriptsWrapper.AbuseReportMenuPlaceholderFrame.MenuLayoutFrame.Menu.MenuItemsContainer
+    local imgLabel = checkReport.AbuseReportMenuNewRoot.FocusNavigationCoreScriptsWrapper.AbuseReportMenuPlaceholderFrame.MenuLayoutFrame.Menu.ReportTypeSelector
+
+    for _, obj in ipairs(icon:GetDescendants()) do  
+        if obj:IsA("ImageLabel") and obj.Name == "Icon" then
+            obj.Image = REPORT_ACTION_SELECTOR r(obj, 193, 37, 39, 39)
+        end
+    end
+
+    for _, obj in ipairs(imgLabel:GetDescendants()) do  
+        if obj:IsA("ImageLabel") and obj.Name == "imageLabel" then
+            local parentName = obj.Parent and obj.Parent.Name or ""
+            if parentName == "LeftChevron" then
+                obj.Image = REPORT_ACTION_LEFT r(obj, 39, 190, 39, 39)
+            elseif parentName == "RightChevron" then
+                obj.Image = REPORT_ACTION_RIGHT r(obj, 305, 39, 39, 39)
+            end
+        end
+    end
+end
+
+if checkgChat then
+local i = checkgChat:FindFirstChild("appLayout") and checkgChat.appLayout:FindFirstChild("chatInputBar")
+if i then
+local a = i.Background.Container.SendButton.SendIcon
+a.Image = CHAT_SEND
+r(a, 230, 75, 39, 39)
+end
+end
+
+if checkcam then
+local h = checkcam.EntrypointButtonContainer.CameraButton.CameraIcon
+h.Image = CAM
+r(h, 220, 367, 73, 73)
+end
+
+		if checkInventory then
+			for _, obj in ipairs(checkInventory:GetDescendants()) do  
+				if obj:IsA("Frame") and obj.Name == "Edge" then  
+					obj.BackgroundColor3 = mcl
+				end
+			end
+		end
+
+		if checkLeaveButton then
+			checkLeaveButton.Border.Color = mcl
+		end
+
+		if checkLeave then
+			local leaveFrame = PV.LeaveGamePage.LeaveGameText.LeaveButtonContainer
+			leaveFrame.DontLeaveGameButton.Border.Color = mcl
+			leaveFrame.LeaveGameButton.Border.Color = mcl
+		end
+
+		if checkReset then
+			local resetFrame = PV.ResetCharacter.ResetCharacterText.ResetButtonContainer
+			resetFrame.ResetCharacterButton.Border.Color = mcl
+			resetFrame.DontResetCharacterButton.Border.Color = mcl
+		end
+
+		if checkInspect then
+			checkInspect.MainContainer.CloseButton.Image = CLOSE_STYLE_1
+			for _, obj in ipairs(checkInspect:GetDescendants()) do  
+				if obj:IsA("ImageLabel") and obj.Name == "Corner" then  
+					obj.ImageColor3 = Color3.new(0, 0, 0) 
+				elseif obj:IsA("ImageLabel") and obj.Name == "EquippedFrame" then  
+					obj.ImageColor3 = mcl
+				end  
+			end  
+		end
+
+		if checkSetting then
+			for _, obj in ipairs(checkSetting:GetDescendants()) do
+				if obj:IsA("ImageLabel") then
+					if obj.Name == "LeftButton" or obj.Name == "RightButton" then
+						local isInForbiddenFrame = false
+						local parent = obj.Parent
+						while parent do
+							if parent.Name == "Background TransparencyFrame" or 
+							   parent.Name == "VolumeFrame" or 
+							   parent.Name == "Graphics QualityFrame" or
+							   parent.Name == "Camera SensitivityFrame" then
+								isInForbiddenFrame = true
+								break
+							end
+							parent = parent.Parent
+						end
+						if isInForbiddenFrame then
+							if obj.Name == "LeftButton" then
+								obj.Image = LESS_CONTROL
+							elseif obj.Name == "RightButton" then
+								obj.Image = MORE_CONTROL
+							end
+						else
+							if obj.Name == "LeftButton" then
+								obj.Image = LEFT_CONTROL
+							elseif obj.Name == "RightButton" then
+								obj.Image = RIGHT_CONTROL
+							end
+						end
+					elseif obj.Name == "DropDownImage" then
+						obj.Image = DROPDOWN_ICON
+					end
+				end
+			end
+		end
+
+		if checkgChat then
+			local checkMainChat = checkgChat:FindFirstChild("appLayout") and checkgChat.appLayout:FindFirstChild("chatWindow")
+			if checkMainChat then
+				local topBanner = checkMainChat:FindFirstChild("TopBanner")
+				local dotMenu = topBanner and topBanner:FindFirstChild("DotMenu")
+				local imageLabel = dotMenu and dotMenu:FindFirstChild("imageLabel")
+				if imageLabel then
+					imageLabel.Image = CHAT_REPORT r(imageLabel, 343, 302, 39, 39)
+				end
+			end
+		end
+	end)
+end)
+
+end
+
+r(menuMenu) r(menuClose) r(rbx) r(set) r(players) r(help) r(report) r(capture)
+
+-- ⭐⭐⭐⭐⭐ TouchGui    ⭐⭐⭐⭐⭐
+
+local checkTouch = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("TouchGui")
+if checkTouch then
+checkTouch.TouchControlFrame.JumpButton.Image = TOUCHGUI
+for _, obj in ipairs(checkTouch.TouchControlFrame.DynamicThumbstickFrame:GetDescendants()) do  
+if obj:IsA("ImageLabel") then
+obj.Image = TOUCHGUI
+obj.ImageColor3 = Color3.new(1, 1, 1)
+end
+end
+end
+
+-- ⭐⭐⭐⭐⭐     Other     ⭐⭐⭐⭐⭐
+
+task.spawn(function()
+    while task.wait() do
+        local PlayersFrame = PV:FindFirstChild("Players")
+        local BottomButtonFrame = ST.MenuContainer:FindFirstChild("BottomButtonFrame")  
+        local HubBar = ST.MenuContainer:FindFirstChild("HubBar")  
+
+        if PlayersFrame then  
+            for _, obj in ipairs(PlayersFrame:GetDescendants()) do  
+                if obj:IsA("ImageLabel") then  
+                    if obj.Name == "InspectButtonImageLabel" then  
+                        obj.Image = INSPECT
+r(obj, 194, 113, 39, 39)
+                    elseif obj.Name == "BlockButtonImageLabel" then  
+                        obj.Image = BLOCK_PLAYER
+r(obj, 346, 114, 39, 39)
+                    elseif obj.Name == "ReportPlayerImageLabel" then  
+                        obj.Image = REPORT  
+                        r(obj, 230, 113, 39, 39)
+                    end  
+                elseif obj:IsA("ImageButton") then  
+                    if obj.Name == "Inspect" or obj.Name == "BlockButton" or obj.Name == "ReportPlayer" then  
+                        obj.BackgroundTransparency = 1  
+                        obj.ImageTransparency = 1  
+                    end  
+                end  
+
+                if obj:IsA("UIStroke") and obj.Name == "Border" then  
+                    obj.Color = mcl
+                end  
+            end  
+        end  
+
+        if BottomButtonFrame then  
+            for _, obj in ipairs(BottomButtonFrame:GetDescendants()) do  
+                if obj:IsA("UIStroke") and obj.Name == "Border" then  
+                    obj.Color = mcl
+                end  
+            end  
+        end  
+
+        if HubBar then  
+            for _, obj in ipairs(HubBar:GetDescendants()) do  
+                if obj.Name == "TabSelection" then  
+                    obj.BackgroundColor3 = mcl 
+                end  
+            end  
+        end  
+    end
+end)
+
+task.spawn(function()
+ game:GetService("RunService").Heartbeat:Connect(function()
+        local gameInvite = C:FindFirstChild("GameInvite")
+        if gameInvite then
+            local modal = gameInvite:FindFirstChild("GameInviteModal")
+            if modal then
+                local modalWindowContainer = modal:FindFirstChild("ModalWindowContainer")
+                local modalContainer = modalWindowContainer and modalWindowContainer:FindFirstChild("GameInviteModalContainer")
+                local content = modalContainer and modalContainer:FindFirstChild("GameInviteContent")
+                local titleContainer = content and content:FindFirstChild("TitleContainer")
+                local gameInviteTitle = titleContainer and titleContainer:FindFirstChild("GameInviteTitle")
+
+                local leftAction = gameInviteTitle and gameInviteTitle:FindFirstChild("LeftActionContainer")
+                local closeBtn = leftAction and leftAction:FindFirstChild("CloseButton")
+                if closeBtn then
+                    closeBtn.Image = CLOSE_STYLE_1 r(closeBtn)
+                end
+
+                local rightAction = gameInviteTitle and gameInviteTitle:FindFirstChild("RightActionContainer")
+                if rightAction then
+                    local searchFriend = rightAction:FindFirstChild("SearchButton")
+                    if searchFriend then
+                        searchFriend.Image = SEARCH_FRIEND
+r(searchFriend, 455, 193, 39, 39)
+                    end
+
+                    local shareGameInviteLink = rightAction:FindFirstChild("ShareGameInviteLink")
+                    if shareGameInviteLink then
+                        shareGameInviteLink.Image = SHARE_FRIEND r(shareGameInviteLink, 384, 0, 39, 39)
+                    end
+                end
+
+                local friendsList = content and content:FindFirstChild("FriendsList")
+                local mainCanvas = friendsList and friendsList:FindFirstChild("MainCanvas")
+                if mainCanvas then
+                    for _, obj in ipairs(mainCanvas:GetDescendants()) do
+                        if obj.Name == "Button" then
+                            obj.ImageColor3 = mcl
+                            end
+                    end
+                end
+            end
+        end
+    end)
+end)
